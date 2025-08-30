@@ -1,0 +1,342 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* VoteSwipe Design System - Modern & Playful */
+    --background: 220 14% 97.5%; /* Off-White #F9FAFB */
+    --foreground: 215 25% 15%; /* Slate #1E293B */
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary: Indigo #6366F1 */
+    --primary: 243 89% 69%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 243 89% 80%;
+
+    /* Secondary: Sky Blue #38BDF8 */
+    --secondary: 199 89% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent: Coral #FB7185 */
+    --accent: 349 89% 73%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 215 14% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 243 89% 69%;
+
+    /* VoteSwipe Custom Tokens */
+    --vote-like: 142 71% 45%; /* Green for Like */
+    --vote-ok: 45 93% 47%; /* Yellow for OK */
+    --vote-dislike: 0 72% 51%; /* Red for Dislike */
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.4));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 6px -1px hsl(var(--primary) / 0.1), 0 2px 4px -1px hsl(var(--primary) / 0.06);
+    --shadow-medium: 0 10px 15px -3px hsl(var(--primary) / 0.1), 0 4px 6px -2px hsl(var(--primary) / 0.05);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+@layer utilities {
+  .font-retro {
+    font-family: 'Press Start 2P', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    letter-spacing: 0.02em;
+  }
+
+  .neon-primary {
+    text-shadow:
+      0 0 6px hsl(var(--primary) / 0.8),
+      0 0 12px hsl(var(--primary) / 0.6),
+      0 0 24px hsl(var(--secondary) / 0.5);
+  }
+
+  .retro-crt {
+    position: relative;
+  }
+  .retro-crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      hsl(0 0% 100% / 0.03) 0px,
+      hsl(0 0% 100% / 0.03) 1px,
+      transparent 2px
+    );
+    mix-blend-mode: overlay;
+    animation: crt-flicker 8s linear infinite;
+  }
+
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 0.15; }
+    10% { opacity: 0.12; }
+    20% { opacity: 0.18; }
+    30% { opacity: 0.10; }
+    40% { opacity: 0.16; }
+    50% { opacity: 0.12; }
+    60% { opacity: 0.20; }
+    70% { opacity: 0.14; }
+    80% { opacity: 0.17; }
+    90% { opacity: 0.11; }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-retro;
+  }
+}
+
+/* Retro Pixel-Art Theme Overrides */
+@layer base {
+  :root {
+    /* Mario-inspired palette */
+    --background: 197 71% 73%; /* Sky blue (#87CEEB-ish) */
+    --foreground: 0 0% 5%; /* Near black */
+
+    --primary: 4 100% 59%; /* Bright red #FF3B30 */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 4 100% 70%;
+
+    --secondary: 135 58% 50%; /* Vibrant green #34C759 */
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 51 100% 50%; /* Coin gold #FFD700 */
+    --accent-foreground: 0 0% 10%;
+
+    --muted: 25 76% 30%; /* Brick brown #8B4513 */
+    --muted-foreground: 0 0% 100%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --border: 0 0% 0%; /* Black borders for pixel look */
+    --input: 0 0% 0%;
+    --ring: 51 100% 50%; /* Gold focus */
+
+    --shadow-soft: 4px 4px 0 0 hsl(0 0% 0% / 0.75);
+    --shadow-medium: 6px 6px 0 0 hsl(0 0% 0% / 0.75);
+    --shadow-glow: 0 0 20px hsl(var(--accent) / 0.6);
+  }
+}
+
+@layer utilities {
+  .font-retro {
+    font-family: 'Press Start 2P', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    letter-spacing: 0.02em;
+  }
+
+  .neon-primary {
+    text-shadow:
+      0 0 6px hsl(var(--accent) / 0.8),
+      0 0 12px hsl(var(--accent) / 0.6),
+      0 0 24px hsl(var(--primary) / 0.5);
+  }
+
+  .retro-crt {
+    position: relative;
+  }
+  .retro-crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      hsl(0 0% 100% / 0.03) 0px,
+      hsl(0 0% 100% / 0.03) 1px,
+      transparent 2px
+    );
+    mix-blend-mode: overlay;
+    animation: crt-flicker 8s linear infinite;
+  }
+
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 0.15; }
+    10% { opacity: 0.12; }
+    20% { opacity: 0.18; }
+    30% { opacity: 0.10; }
+    40% { opacity: 0.16; }
+    50% { opacity: 0.12; }
+    60% { opacity: 0.20; }
+    70% { opacity: 0.14; }
+    80% { opacity: 0.17; }
+    90% { opacity: 0.11; }
+  }
+
+  .pixel-border {
+    box-shadow: 4px 4px 0 0 hsl(0 0% 0% / 0.75);
+    border-width: 2px;
+    border-color: hsl(var(--border));
+    border-radius: 0;
+  }
+
+  .pixel-press {
+    transition: transform 80ms ease, box-shadow 80ms ease;
+  }
+  .pixel-press:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 0 hsl(0 0% 0% / 0.75);
+  }
+
+  .coin-glow {
+    box-shadow: 0 0 12px hsl(var(--accent) / 0.7), 0 0 24px hsl(var(--accent) / 0.5);
+  }
+
+  .tile-grid {
+    background-image:
+      linear-gradient(hsl(0 0% 0% / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 0% / 0.08) 1px, transparent 1px);
+    background-size: 32px 32px, 32px 32px;
+  }
+
+  /* Pixel sprite utilities */
+  .pixel-cloud, .pixel-leaf { position: absolute; width: var(--p, 6px); height: var(--p, 6px); image-rendering: pixelated; }
+
+  .pixel-cloud::before {
+    content: "";
+    position: absolute;
+    width: var(--p, 6px);
+    height: var(--p, 6px);
+    background: #fff;
+    /* 8x5 simple cloud shape */
+    box-shadow:
+      calc(var(--p)*2) 0 0 0 #fff,
+      calc(var(--p)*3) 0 0 0 #fff,
+      calc(var(--p)*4) 0 0 0 #fff,
+
+      calc(var(--p)*1) calc(var(--p)*1) 0 0 #fff,
+      calc(var(--p)*2) calc(var(--p)*1) 0 0 #fff,
+      calc(var(--p)*3) calc(var(--p)*1) 0 0 #fff,
+      calc(var(--p)*4) calc(var(--p)*1) 0 0 #fff,
+      calc(var(--p)*5) calc(var(--p)*1) 0 0 #fff,
+
+      0 calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*1) calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*2) calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*3) calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*4) calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*5) calc(var(--p)*2) 0 0 #fff,
+      calc(var(--p)*6) calc(var(--p)*2) 0 0 #fff,
+
+      calc(var(--p)*1) calc(var(--p)*3) 0 0 #fff,
+      calc(var(--p)*2) calc(var(--p)*3) 0 0 #fff,
+      calc(var(--p)*3) calc(var(--p)*3) 0 0 #fff,
+      calc(var(--p)*4) calc(var(--p)*3) 0 0 #fff,
+      calc(var(--p)*5) calc(var(--p)*3) 0 0 #fff,
+
+      calc(var(--p)*2) calc(var(--p)*4) 0 0 #fff,
+      calc(var(--p)*3) calc(var(--p)*4) 0 0 #fff,
+      calc(var(--p)*4) calc(var(--p)*4) 0 0 #fff;
+  }
+
+  .pixel-leaf::before {
+    content: "";
+    position: absolute;
+    width: var(--p, 6px);
+    height: var(--p, 6px);
+    background: hsl(var(--secondary));
+    /* 3x3 leaf */
+    box-shadow:
+      calc(var(--p)*1) 0 0 0 hsl(var(--secondary)),
+      0 calc(var(--p)*1) 0 0 hsl(var(--secondary)),
+      calc(var(--p)*1) calc(var(--p)*1) 0 0 hsl(var(--secondary)),
+      calc(var(--p)*2) calc(var(--p)*1) 0 0 hsl(var(--secondary)),
+      calc(var(--p)*1) calc(var(--p)*2) 0 0 hsl(var(--secondary));
+  }
+
+  @keyframes cloud-move {
+    0% { transform: translateX(-15vw); }
+    100% { transform: translateX(115vw); }
+  }
+
+  @keyframes leaf-fall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translateY(50vh) translateX(-15px) rotate(20deg); }
+    100% { transform: translateY(110vh) translateX(15px) rotate(-20deg); opacity: 0; }
+  }
+}
+}
