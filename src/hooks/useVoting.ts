@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,17 +18,22 @@ export interface VotingSession {
   created_at: string;
 }
 
+export type VoteType = 'like' | 'ok' | 'dislike';
+
 export const useVoting = (sessionId: string) => {
   const [session, setSession] = useState<VotingSession | null>(null);
   const [images, setImages] = useState<VotingImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [votes, setVotes] = useState<Record<string, string>>({});
+  const [votes, setVotes] = useState<Record<string, VoteType>>({});
   const { toast } = useToast();
+  const autoAdvanceTimeoutRef = useRef<number | null>(null);
 
-  const fetchSessionData = async () => {
+  const fetchSessionData = async (options?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      if (!options?.silent) {
+        setLoading(true);
+      }
       
       const [sessionResult, imagesResult] = await Promise.all([
         supabase
@@ -73,12 +78,22 @@ export const useVoting = (sessionId: string) => {
               .select('image_id, vote_type')
               .eq('voter_name', voterName as string)
               .in('image_id', imageIds);
-            const votesMap: Record<string, string> = {};
-            (byName || []).forEach(vote => { votesMap[vote.image_id] = vote.vote_type; });
+            const votesMap: Record<string, VoteType> = {};
+            (byName || []).forEach(vote => {
+              const vt = vote.vote_type as string;
+              if (vt === 'like' || vt === 'ok' || vt === 'dislike') {
+                votesMap[vote.image_id] = vt;
+              }
+            });
             setVotes(votesMap);
           } else {
-            const votesMap: Record<string, string> = {};
-            (data || []).forEach(vote => { votesMap[vote.image_id] = vote.vote_type; });
+            const votesMap: Record<string, VoteType> = {};
+            (data || []).forEach(vote => {
+              const vt = vote.vote_type as string;
+              if (vt === 'like' || vt === 'ok' || vt === 'dislike') {
+                votesMap[vote.image_id] = vt;
+              }
+            });
             setVotes(votesMap);
           }
         } catch (e) {
@@ -95,12 +110,15 @@ export const useVoting = (sessionId: string) => {
         variant: 'destructive'
       });
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   };
 
-  const castVote = async (imageId: string, voteType: 'like' | 'ok' | 'dislike') => {
+  const castVote = async (imageId: string, voteType: VoteType) => {
     const voterId = localStorage.getItem('voterId');
+    const voterName = localStorage.getItem('voterName') || '';
     if (!voterId) {
       toast({
         title: 'Error',
@@ -161,11 +179,14 @@ export const useVoting = (sessionId: string) => {
         [imageId]: voteType
       }));
 
-      // Move to next image after a short delay
-      setTimeout(() => {
-        if (currentImageIndex < images.length - 1) {
-          setCurrentImageIndex(prev => prev + 1);
-        }
+      // Move to next image after a short delay (clear any prior pending advances)
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current);
+        autoAdvanceTimeoutRef.current = null;
+      }
+      autoAdvanceTimeoutRef.current = window.setTimeout(() => {
+        setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : prev));
+        autoAdvanceTimeoutRef.current = null;
       }, 500);
 
       toast({
@@ -184,15 +205,23 @@ export const useVoting = (sessionId: string) => {
   };
 
   const nextImage = () => {
-    if (currentImageIndex < images.length - 1) {
-      setCurrentImageIndex(prev => prev + 1);
+    // Clear any pending auto-advance so manual nav isn't overridden
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
     }
+    // Non-looping: stop at the last image
+    setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : prev));
   };
 
   const previousImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(prev => prev - 1);
+    // Clear any pending auto-advance so manual nav isn't overridden
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
     }
+    // Non-looping: stop at the first image
+    setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : prev));
   };
 
   const goToImage = (index: number) => {
@@ -218,8 +247,8 @@ export const useVoting = (sessionId: string) => {
           table: 'votes',
           filter: `image_id=in.(${images.map(img => img.id).join(',')})`
         }, () => {
-          // Refetch images to get updated vote counts
-          fetchSessionData();
+          // Refetch images to get updated vote counts without blocking UI interactions
+          fetchSessionData({ silent: true });
         })
         .subscribe();
 
@@ -228,6 +257,16 @@ export const useVoting = (sessionId: string) => {
       };
     }
   }, [sessionId, images.length]);
+
+  // Cleanup pending auto-advance on unmount
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current);
+        autoAdvanceTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     session,

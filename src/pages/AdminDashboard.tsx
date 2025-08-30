@@ -173,8 +173,9 @@ const AdminDashboard = () => {
 
           <TabsContent value="management" className="space-y-6">
             {/* Session Management */}
-            <Card className="p-8 bg-card/90 backdrop-blur-sm w-full max-w-[80vw] mx-auto text-lg">
-              <div className="flex justify-between items-center mb-6">
+            <Card className="p-8 bg-card/90 backdrop-blur-sm text-foreground w-full max-w-[80vw] mx-auto text-lg">
+              <div className="overflow-x-auto">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Voting Sessions</h2>
                 <NewSessionDialog onCreateSession={createSession} />
               </div>
@@ -186,16 +187,16 @@ const AdminDashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {sessions.map((session) => (
-                    <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={session.id} className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border rounded-lg">
                       <div>
-                        <h3 className="font-semibold">{session.name}</h3>
-                        <div className="flex gap-4 text-sm text-foreground mt-1">
+                        <h3 className="font-semibold break-words">{session.name}</h3>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground mt-1">
                           <span>{session.image_count || 0} images</span>
                           <span>{session.total_votes || 0} votes</span>
                           <span>Created {new Date(session.created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 md:flex-nowrap md:justify-end">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -238,18 +239,19 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               )}
+              </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">
             {/* Results */}
             <Card className="p-8 bg-card/90 backdrop-blur-sm text-foreground w-full max-w-[80vw] mx-auto text-lg">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Live Results</h2>
-                <div className="flex gap-2 items-center">
-                  <div className="min-w-[220px]">
+                <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+                  <div className="w-full min-w-0 sm:min-w-[220px] sm:w-[220px]">
                     <Select value={selectedSessionId ?? undefined} onValueChange={(v) => setSelectedSessionId(v)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select session" />
                       </SelectTrigger>
                       <SelectContent>
@@ -259,7 +261,7 @@ const AdminDashboard = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button variant="outline" size="sm" onClick={exportToCSV} disabled={sortedImages.length === 0}>
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={exportToCSV} disabled={sortedImages.length === 0}>
                     <Download className="w-4 h-4 mr-2" />
                     Export CSV
                   </Button>
@@ -324,7 +326,7 @@ const AdminDashboard = () => {
                             )}
                           </button>
                         </TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
+                        <TableHead className="text-center text-foreground align-middle">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import VoteSwipeLogo from "@/components/VoteSwipeLogo";
+import FallingLeaves from "@/components/FallingLeaves";
+import FloatingClouds from "@/components/FloatingClouds";
+import FoxRunner from "@/components/FoxRunner";
 import heroImage from "@/assets/hero-image.jpeg";
 import { ArrowRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,15 +64,10 @@ const Landing = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated' as any }}
         />
-        {/* Pixel clouds and leaves */}
-        <div className="absolute top-10 left-[-10vw] pixel-cloud" style={{ ['--p' as any]: '5px', animation: 'cloud-move 60s linear infinite' }} />
-        <div className="absolute top-24 left-[-20vw] pixel-cloud" style={{ ['--p' as any]: '6px', animation: 'cloud-move 75s linear infinite' }} />
-        <div className="absolute top-40 left-[-15vw] pixel-cloud" style={{ ['--p' as any]: '4px', animation: 'cloud-move 50s linear infinite' }} />
-        {
-          Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="pixel-leaf" style={{ left: `${(i * 8) % 100}vw`, animation: `leaf-fall ${10 + (i % 6)}s linear ${i * 0.8}s infinite` }} />
-          ))
-        }
+        <FoxRunner scale={2} groundOffset="15%" />
+        {/* Clouds using images in top half */}
+        <FloatingClouds count={6} />
+        <FallingLeaves count={10} />
         <div className="relative min-h-screen">
           <div className="container mx-auto px-4 py-24 md:py-28 min-h-screen flex flex-col">
             <Button

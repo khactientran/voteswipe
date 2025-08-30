@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import VoteSwipeLogo from "@/components/VoteSwipeLogo";
 import { useVoting } from "@/hooks/useVoting";
+import { useSwipe } from "@/hooks/useSwipe";
+import QuickNavigator from "@/components/QuickNavigator";
+import ImageScrubber from "@/components/ImageScrubber";
 import { ArrowLeft, ArrowRight, Home, Loader2 } from "lucide-react";
 
 const VotingPage = () => {
@@ -20,33 +23,69 @@ const VotingPage = () => {
     currentImageIndex,
     votes,
     loading,
-    hasNextImage,
-    hasPreviousImage,
     castVote,
     nextImage,
     previousImage,
+    hasNextImage,
+    hasPreviousImage,
+    images,
+    goToImage,
     totalImages,
     completedVotes
   } = useVoting(sessionId || "");
 
-  // Swipe handling
-  const touchStartX = useRef<number | null>(null);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    const threshold = 40;
-    if (deltaX > threshold) previousImage();
-    if (deltaX < -threshold) nextImage();
-    touchStartX.current = null;
-  };
+  // Swipe support
+  const imageContainerRef = useSwipe<HTMLDivElement>({
+    onSwipeLeft: () => nextImage(),
+    onSwipeRight: () => previousImage(),
+    threshold: 40,
+    restraint: 100,
+    allowedTime: 600,
+  });
 
   useEffect(() => {
     const savedVoterName = localStorage.getItem("voterName") || "";
     setVoterName(savedVoterName);
   }, [navigate]);
+
+  // Keyboard navigation: arrows, Home, End, PageUp/PageDown
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const isEditable = (target as any)?.isContentEditable;
+      if (tag === 'input' || tag === 'textarea' || isEditable) return;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (hasPreviousImage) previousImage();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (hasNextImage) nextImage();
+          break;
+        case 'Home':
+          e.preventDefault();
+          goToImage(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goToImage(totalImages - 1);
+          break;
+        case 'PageUp':
+          e.preventDefault();
+          if (hasPreviousImage) previousImage();
+          break;
+        case 'PageDown':
+          e.preventDefault();
+          if (hasNextImage) nextImage();
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [hasPreviousImage, hasNextImage, previousImage, nextImage, goToImage, totalImages]);
 
   if (loading) {
     return (
@@ -109,55 +148,39 @@ const VotingPage = () => {
         </div>
 
         {/* Progress */}
-        <div className="text-center mb-4 text-foreground">
-          <Badge variant="secondary" className="text-lg px-4 py-2 mb-4">
+        <div className="text-center mb-2 text-foreground">
+          <Badge variant="secondary" className="text-base px-3 py-1.5 mb-3">
             Image {currentImageIndex + 1} of {totalImages}
           </Badge>
           <div className="max-w-md mx-auto">
-            <Progress value={progressPercentage} className="h-2" />
-            <p className="text-foreground/80 text-sm mt-2">{completedVotes} votes cast</p>
+            <Progress value={progressPercentage} className="h-1.5" />
+            <p className="text-foreground/80 text-xs mt-2">{completedVotes} votes cast</p>
           </div>
         </div>
 
         {/* Main Voting Interface */}
-        <div className="max-w-4xl mx-auto">
-          <Card className="p-8 shadow-glow bg-card/90 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto">
+          <Card className="p-6 md:p-8 shadow-glow bg-card/90 backdrop-blur-sm">
             {/* Image Container */}
-            <div className="relative mb-8">
-              <div
-                className="aspect-video bg-muted rounded-lg overflow-hidden shadow-medium"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
+            <div className="relative mb-6 md:mb-8" ref={imageContainerRef}>
+              <div className="bg-muted rounded-lg overflow-hidden shadow-medium">
                 {currentImage && (
                   <img
                     src={currentImage.url}
                     alt={currentImage.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain max-h-[70vh]"
                   />
                 )}
               </div>
-              {/* Click/tap overlay zones for previous/next */}
-              <div
-                className="absolute inset-y-0 left-0 w-1/2 z-10"
-                onClick={previousImage}
-                aria-label="Previous image"
-                role="button"
-              />
-              <div
-                className="absolute inset-y-0 right-0 w-1/2 z-10"
-                onClick={nextImage}
-                aria-label="Next image"
-                role="button"
-              />
               
               {/* Navigation Arrows */}
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-card/90 hover:bg-card z-20"
+                className="hidden absolute left-4 top-1/2 -translate-y-1/2 bg-card/90 hover:bg-card z-20"
                 onClick={previousImage}
-                disabled={!hasPreviousImage}
+                disabled
+                aria-label="Previous image"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -165,37 +188,38 @@ const VotingPage = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-card/90 hover:bg-card z-20"
+                className="hidden absolute right-4 top-1/2 -translate-y-1/2 bg-card/90 hover:bg-card z-20"
                 onClick={nextImage}
-                disabled={!hasNextImage}
+                disabled
+                aria-label="Next image"
               >
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </div>
 
             {/* Image Info */}
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-2 max-w-full truncate mx-auto">{currentImage?.name}</h2>
+            <div className="text-center mb-6">
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 max-w-full truncate mx-auto">{currentImage?.name}</h2>
               {currentVote && (
-                <Badge variant="outline" className="text-sm">
+                <Badge variant="outline" className="text-xs md:text-sm">
                   Your vote: {currentVote === 'like' ? '❤️ Like' : currentVote === 'ok' ? '🙂 OK' : '👎 Don\'t Like'}
                 </Badge>
               )}
             </div>
 
             {/* Voting Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               <Button
                 onClick={() => currentImage && castVote(currentImage.id, 'like')}
                 size="lg"
                 variant={currentVote === 'like' ? 'default' : 'outline'}
-                className={`h-16 text-lg font-semibold ${
+                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
                   currentVote === 'like' 
                     ? 'bg-vote-like hover:bg-vote-like text-white' 
                     : 'hover:bg-vote-like hover:text-white hover:border-vote-like'
                 }`}
               >
-                <span className="mr-2 text-xl">❤️</span>
+                <span className="mr-2 text-lg md:text-xl">❤️</span>
                 Like
               </Button>
               
@@ -203,13 +227,13 @@ const VotingPage = () => {
                 onClick={() => currentImage && castVote(currentImage.id, 'ok')}
                 size="lg"
                 variant={currentVote === 'ok' ? 'default' : 'outline'}
-                className={`h-16 text-lg font-semibold ${
+                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
                   currentVote === 'ok' 
                     ? 'bg-vote-ok hover:bg-vote-ok text-white' 
                     : 'hover:bg-vote-ok hover:text-white hover:border-vote-ok'
                 }`}
               >
-                <span className="mr-2 text-xl">🙂</span>
+                <span className="mr-2 text-lg md:text-xl">🙂</span>
                 OK
               </Button>
               
@@ -217,36 +241,36 @@ const VotingPage = () => {
                 onClick={() => currentImage && castVote(currentImage.id, 'dislike')}
                 size="lg"
                 variant={currentVote === 'dislike' ? 'default' : 'outline'}
-                className={`h-16 text-lg font-semibold ${
+                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
                   currentVote === 'dislike' 
                     ? 'bg-vote-dislike hover:bg-vote-dislike text-white' 
                     : 'hover:bg-vote-dislike hover:text-white hover:border-vote-dislike'
                 }`}
               >
-                <span className="mr-2 text-xl">👎</span>
+                <span className="mr-2 text-lg md:text-xl">👎</span>
                 Don't Like
               </Button>
             </div>
 
-            {/* Progress Dots */}
-            <div className="flex justify-center mt-8 space-x-2">
-              {Array.from({ length: Math.min(totalImages, 10) }, (_, i) => {
-                const imageIndex = i;
-                return (
-                  <div
-                    key={imageIndex}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      imageIndex === currentImageIndex
-                        ? 'bg-primary scale-125'
-                        : imageIndex < currentImageIndex
-                        ? 'bg-accent'
-                        : 'bg-muted'
-                    }`}
-                  />
-                );
-              })}
+            {/* Image Scrubber for large sessions */}
+            <div className="mt-8">
+              <ImageScrubber
+                count={totalImages}
+                value={currentImageIndex}
+                onChange={(idx) => goToImage(idx)}
+              />
             </div>
           </Card>
+
+          {/* Quick Navigator */}
+          <div className="mt-6">
+            <QuickNavigator
+              items={images.map(img => ({ id: img.id, url: img.url, name: img.name }))}
+              currentIndex={currentImageIndex}
+              onSelect={(idx) => goToImage(idx)}
+              votes={votes}
+            />
+          </div>
 
           {/* Completion Message */}
           {completedVotes === totalImages && (

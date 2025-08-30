@@ -242,14 +242,87 @@ export const useVotingSessions = () => {
     }
   };
 
+  // Resize images on the client to preserve aspect ratio while fitting within a max box
+  // This significantly reduces upload size and speeds up later display.
+  const resizeImageFile = async (
+    file: File,
+    maxWidth = 1600,
+    maxHeight = 1600,
+    quality = 0.82
+  ): Promise<File> => {
+    try {
+      if (!file.type.startsWith('image/')) return file;
+
+      // Create an HTMLImageElement to draw into a canvas
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.src = objectUrl;
+      // Wait for decode to ensure dimensions are available
+      await (img.decode ? img.decode() : new Promise((res, rej) => {
+        img.onload = () => res(undefined);
+        img.onerror = (e) => rej(e);
+      }));
+
+      const originalWidth = img.naturalWidth || img.width;
+      const originalHeight = img.naturalHeight || img.height;
+      if (!originalWidth || !originalHeight) {
+        URL.revokeObjectURL(objectUrl);
+        return file;
+      }
+
+      const widthScale = maxWidth / originalWidth;
+      const heightScale = maxHeight / originalHeight;
+      const scale = Math.min(1, widthScale, heightScale); // only scale down
+
+      const targetWidth = Math.round(originalWidth * scale);
+      const targetHeight = Math.round(originalHeight * scale);
+
+      // If no resizing is needed and the file is already reasonably small, keep original
+      if (scale === 1 && file.size < 2_000_000) { // 2MB threshold
+        URL.revokeObjectURL(objectUrl);
+        return file;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        URL.revokeObjectURL(objectUrl);
+        return file;
+      }
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      URL.revokeObjectURL(objectUrl);
+
+      // Prefer JPEG for photos to get better compression
+      const mimeType = 'image/jpeg';
+      const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), mimeType, quality)
+      );
+      if (!blob) return file;
+
+      const baseName = file.name.replace(/\.[^/.]+$/, '');
+      const resizedFile = new File([blob], `${baseName}.jpg`, { type: mimeType });
+      return resizedFile;
+    } catch (e) {
+      // If anything fails, fall back to original file to avoid blocking uploads
+      return file;
+    }
+  };
+
   const uploadImages = async (sessionId: string, files: File[]) => {
     try {
-      const uploadPromises = files.map(async (file) => {
-        const fileName = `${sessionId}/${Date.now()}-${file.name}`;
+      // Resize all images client-side before uploading
+      const resizedFiles = await Promise.all(files.map((f) => resizeImageFile(f)));
+
+      const uploadPromises = resizedFiles.map(async (file) => {
+        // Ensure file has an image extension in the storage path
+        const safeFileName = file.name.match(/\.[a-zA-Z0-9]+$/) ? file.name : `${file.name}.jpg`;
+        const fileName = `${sessionId}/${Date.now()}-${safeFileName}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('voting-images')
-          .upload(fileName, file);
+          .upload(fileName, file, { contentType: file.type || 'image/jpeg', upsert: false });
 
         if (uploadError) throw uploadError;
 
@@ -261,7 +334,7 @@ export const useVotingSessions = () => {
           .from('images')
           .insert([{
             session_id: sessionId,
-            name: file.name,
+            name: safeFileName,
             url: publicUrl
           }])
           .select()
