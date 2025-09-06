@@ -27,9 +27,10 @@ const SCALE_MULTIPLIER = 2;
 type FoxRunnerProps = {
 	scale?: number; // absolute scale; if provided, overrides responsive base
 	groundOffset?: string | number; // CSS bottom value (e.g., '10%' or 24)
+	isVisible?: boolean; // whether to show the fox
 };
 
-const FoxRunner = ({ scale, groundOffset = "15%" }: FoxRunnerProps) => {
+const FoxRunner = ({ scale, groundOffset = "15%", isVisible = true }: FoxRunnerProps) => {
 	const runnerRef = useRef<HTMLDivElement | null>(null);
 	const spriteRef = useRef<HTMLDivElement | null>(null);
 
@@ -110,7 +111,11 @@ const FoxRunner = ({ scale, groundOffset = "15%" }: FoxRunnerProps) => {
 			if (frameTimerRef.current) clearInterval(frameTimerRef.current);
 			window.removeEventListener("resize", onResize);
 		};
-	}, [scale]);
+	}, [scale, isVisible]);
+
+	if (!isVisible) {
+		return null;
+	}
 
 	return (
 		<div

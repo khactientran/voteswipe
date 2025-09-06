@@ -33,7 +33,7 @@ function createLeaf(viewportWidth: number, startAbove: boolean): Leaf {
   };
 }
 
-export default function FallingLeaves({ count = 18 }: { count?: number }) {
+export default function FallingLeaves({ count = 18, isDarkMode = false }: { count?: number; isDarkMode?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const leavesRef = useRef<Leaf[]>([]);
   const leafElsRef = useRef<HTMLDivElement[]>([]);
@@ -125,6 +125,8 @@ export default function FallingLeaves({ count = 18 }: { count?: number }) {
             height: 48,
             transform: "translate(0px, -100px)",
             willChange: "transform, opacity",
+            filter: isDarkMode ? "brightness(0.4) contrast(0.9)" : "none",
+            transition: "filter 0.5s ease-in-out",
           }}
         >
           <img

@@ -362,5 +362,90 @@ All colors MUST be HSL.
     80%  { transform: translateY(95vh) translateX(calc(var(--sway-amp, 20px) * 0.4)) rotate(calc(var(--init-rot, 0deg) + calc(var(--rot-amp, 20deg) * -0.6))); }
     100% { opacity: 0; transform: translateY(120vh) translateX(calc(var(--sway-amp, 20px) * 0.8)) rotate(calc(var(--init-rot, 0deg) + var(--rot-amp, 20deg))); }
   }
+
+  /* Realistic fire flickering animations - slower and more natural */
+  @keyframes fire-flicker-inner {
+    0% { 
+      opacity: 0.8; 
+      transform: scale(2.6) translateY(27px);
+      filter: blur(10px) hue-rotate(-3deg);
+    }
+    20% { 
+      opacity: 0.95; 
+      transform: scale(2.9) translateY(24px);
+      filter: blur(13px) hue-rotate(2deg);
+    }
+    40% { 
+      opacity: 0.85; 
+      transform: scale(2.7) translateY(26px);
+      filter: blur(11px) hue-rotate(-1deg);
+    }
+    60% { 
+      opacity: 1; 
+      transform: scale(3.0) translateY(23px);
+      filter: blur(14px) hue-rotate(3deg);
+    }
+    80% { 
+      opacity: 0.9; 
+      transform: scale(2.75) translateY(25px);
+      filter: blur(12px) hue-rotate(-2deg);
+    }
+    100% { 
+      opacity: 0.85; 
+      transform: scale(2.8) translateY(25px);
+      filter: blur(12px) hue-rotate(0deg);
+    }
+  }
+
+  @keyframes fire-flicker-medium {
+    0% { 
+      opacity: 0.6; 
+      transform: scale(3.3) translateY(21px);
+      filter: blur(15px) hue-rotate(-2deg);
+    }
+    25% { 
+      opacity: 0.75; 
+      transform: scale(3.7) translateY(18px);
+      filter: blur(17px) hue-rotate(1deg);
+    }
+    50% { 
+      opacity: 0.65; 
+      transform: scale(3.4) translateY(22px);
+      filter: blur(16px) hue-rotate(-1deg);
+    }
+    75% { 
+      opacity: 0.8; 
+      transform: scale(3.6) translateY(19px);
+      filter: blur(18px) hue-rotate(2deg);
+    }
+    100% { 
+      opacity: 0.7; 
+      transform: scale(3.5) translateY(20px);
+      filter: blur(16px) hue-rotate(0deg);
+    }
+  }
+
+  @keyframes fire-flicker-outer {
+    0% { 
+      opacity: 0.4; 
+      transform: scale(4.8) translateY(18px);
+      filter: blur(22px) hue-rotate(-1deg);
+    }
+    33% { 
+      opacity: 0.55; 
+      transform: scale(5.2) translateY(12px);
+      filter: blur(26px) hue-rotate(2deg);
+    }
+    66% { 
+      opacity: 0.45; 
+      transform: scale(4.9) translateY(17px);
+      filter: blur(24px) hue-rotate(-1deg);
+    }
+    100% { 
+      opacity: 0.5; 
+      transform: scale(5.0) translateY(15px);
+      filter: blur(24px) hue-rotate(0deg);
+    }
+  }
 }
 }

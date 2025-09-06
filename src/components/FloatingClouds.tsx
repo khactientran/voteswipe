@@ -50,7 +50,7 @@ function createCloud(viewportWidth: number, viewportHeight: number): Cloud {
   };
 }
 
-export default function FloatingClouds({ count = 5 }: { count?: number }) {
+export default function FloatingClouds({ count = 5, isDarkMode = false }: { count?: number; isDarkMode?: boolean }) {
   const cloudElsRef = useRef<HTMLDivElement[]>([]);
   const cloudsRef = useRef<Cloud[]>([]);
   const lastRef = useRef<number>(performance.now());
@@ -125,7 +125,16 @@ export default function FloatingClouds({ count = 5 }: { count?: number }) {
           ref={(el) => {
             if (el) cloudElsRef.current[i] = el;
           }}
-          style={{ position: "absolute", left: 0, top: 0, width: 128, height: 80, transform: "translate(-100px, 0)" }}
+          style={{ 
+            position: "absolute", 
+            left: 0, 
+            top: 0, 
+            width: 128, 
+            height: 80, 
+            transform: "translate(-100px, 0)",
+            filter: isDarkMode ? "brightness(0.85) contrast(0.95)" : "none",
+            transition: "filter 0.5s ease-in-out"
+          }}
         >
           <img
             src={CLOUD_IMAGES[i % CLOUD_IMAGES.length]}
