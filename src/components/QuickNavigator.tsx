@@ -40,7 +40,7 @@ export default function QuickNavigator({ items, currentIndex, onSelect, votes }:
       {/* Horizontal thumbnails */}
       <div
         ref={containerRef}
-        className="flex gap-2 overflow-x-auto no-scrollbar py-2 px-12 rounded-md bg-card/70"
+        className="flex gap-1 xs:gap-2 overflow-x-auto no-scrollbar py-1 xs:py-2 px-8 xs:px-10 md:px-12 rounded-md bg-card/70"
         style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain', touchAction: 'pan-x', cursor: 'grab' }}
         
         // Kinetic drag-to-scroll for mouse pointers; touch uses native momentum
@@ -131,7 +131,7 @@ export default function QuickNavigator({ items, currentIndex, onSelect, votes }:
             <div
               key={item.id}
               data-qn-index={idx}
-              className={`shrink-0 w-24 h-16 rounded-md overflow-hidden border transition-all ${
+              className={`shrink-0 w-16 xs:w-20 md:w-24 h-10 xs:h-12 md:h-16 rounded-md overflow-hidden border transition-all ${
                 isActive ? "border-primary ring-2 ring-primary/40" : "border-border hover:border-primary/50"
               }`}
               onClick={() => onSelect(idx)}
@@ -149,7 +149,7 @@ export default function QuickNavigator({ items, currentIndex, onSelect, votes }:
                 <img src={item.url} alt={item.name} className="w-full h-full object-cover select-none" loading="lazy" draggable={false} />
                 {vote && (
                   <span
-                    className={`absolute top-1 right-1 h-3 w-3 rounded-full shadow ring-2 ring-black ${voteColor}`}
+                    className={`absolute top-0.5 xs:top-1 right-0.5 xs:right-1 h-2 xs:h-2.5 md:h-3 w-2 xs:w-2.5 md:w-3 rounded-full shadow ring-1 xs:ring-2 ring-black ${voteColor}`}
                     title={`Voted: ${vote}`}
                     aria-label={`Voted: ${vote}`}
                   />

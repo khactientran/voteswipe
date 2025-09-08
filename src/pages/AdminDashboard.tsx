@@ -137,46 +137,49 @@ const AdminDashboard = () => {
       />
       {/* Header */}
       <header className="bg-card/90 backdrop-blur-sm border-b shadow-soft relative">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <VoteSwipeLogo />
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="text-sm text-foreground">
-                Admin Dashboard
+        <div className="container mx-auto px-3 xs:px-4 py-3 xs:py-4">
+          <div className="flex flex-col xs:flex-row justify-between items-center gap-3 xs:gap-0">
+            <VoteSwipeLogo className="scale-75 xs:scale-100" />
+            <div className="flex items-center gap-2 xs:gap-4">
+              <Badge variant="outline" className="text-xs xs:text-sm text-foreground">
+                <span className="hidden xs:inline">Admin Dashboard</span>
+                <span className="xs:hidden">Admin</span>
               </Badge>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
+              <Button variant="outline" size="sm" onClick={handleLogout} className="text-xs xs:text-sm">
+                <LogOut className="w-3 xs:w-4 h-3 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden xs:inline">Logout</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 relative">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Manage your voting sessions and view real-time results</p>
+      <div className="container mx-auto px-3 xs:px-4 py-4 xs:py-6 md:py-8 relative">
+        <div className="mb-4 xs:mb-6 md:mb-8">
+          <h1 className="text-xl xs:text-2xl md:text-3xl font-bold mb-1 xs:mb-2">Dashboard</h1>
+          <p className="text-xs xs:text-sm md:text-base text-muted-foreground">Manage your voting sessions and view real-time results</p>
         </div>
 
-        <Tabs defaultValue="management" className="space-y-6">
+        <Tabs defaultValue="management" className="space-y-4 xs:space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-            <TabsTrigger value="management" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Management
+            <TabsTrigger value="management" className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
+              <Settings className="w-3 xs:w-4 h-3 xs:h-4" />
+              <span className="hidden xs:inline">Management</span>
+              <span className="xs:hidden">Manage</span>
             </TabsTrigger>
-            <TabsTrigger value="results" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
+            <TabsTrigger value="results" className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
+              <BarChart3 className="w-3 xs:w-4 h-3 xs:h-4" />
               Results
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="management" className="space-y-6">
+          <TabsContent value="management" className="space-y-4 xs:space-y-6">
             {/* Session Management */}
-            <Card className="p-8 bg-card/90 backdrop-blur-sm text-foreground w-full max-w-[80vw] mx-auto text-lg">
+            <Card className="p-3 xs:p-4 md:p-6 lg:p-8 bg-card/90 backdrop-blur-sm text-foreground w-full mx-auto text-sm xs:text-base md:text-lg">
               <div className="overflow-x-auto">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Voting Sessions</h2>
+              <div className="flex flex-col gap-2 xs:gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 xs:mb-6">
+                <h2 className="text-lg xs:text-xl md:text-2xl font-semibold">Voting Sessions</h2>
                 <NewSessionDialog onCreateSession={createSession} />
               </div>
 

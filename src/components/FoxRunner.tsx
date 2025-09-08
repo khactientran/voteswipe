@@ -64,12 +64,12 @@ const FoxRunner = ({ scale, groundOffset = "15%", isVisible = true }: FoxRunnerP
 
 		const onResize = () => {
 			const vw = window.innerWidth;
+			const oldScale = scaleRef.current;
 			scaleRef.current = computeEffectiveScale(vw);
 			speedRef.current = getSpeedPxPerSecond(vw);
-			// Reset off-screen start so it adapts to new size
-			positionXRef.current = -FRAME_WIDTH * scaleRef.current;
-			// Apply scale immediately
-			if (spriteRef.current) {
+			
+			// Don't reset position, just adjust scale proportionally if needed
+			if (oldScale !== scaleRef.current && spriteRef.current) {
 				spriteRef.current.style.transform = `scale(${scaleRef.current})`;
 			}
 		};
@@ -111,12 +111,16 @@ const FoxRunner = ({ scale, groundOffset = "15%", isVisible = true }: FoxRunnerP
 			if (frameTimerRef.current) clearInterval(frameTimerRef.current);
 			window.removeEventListener("resize", onResize);
 		};
-	}, [scale, isVisible]);
+	}, []); // Remove dependencies to prevent animation restart
 
-	if (!isVisible) {
-		return null;
-	}
+	// Handle visibility changes without restarting animation
+	useEffect(() => {
+		if (runnerRef.current) {
+			runnerRef.current.style.display = isVisible ? 'block' : 'none';
+		}
+	}, [isVisible]);
 
+	// Always render the component but control visibility with CSS
 	return (
 		<div
 			className="pointer-events-none select-none"
@@ -126,6 +130,7 @@ const FoxRunner = ({ scale, groundOffset = "15%", isVisible = true }: FoxRunnerP
 				bottom: typeof groundOffset === "number" ? `${groundOffset}px` : groundOffset,
 				willChange: "transform",
 				zIndex: 5,
+				display: isVisible ? 'block' : 'none'
 			}}
 			ref={runnerRef}
 		>

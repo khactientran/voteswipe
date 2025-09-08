@@ -13,9 +13,15 @@ export default {
 		container: {
 			center: true,
 			padding: '2rem',
-			screens: {
-				'2xl': '1400px'
-			}
+		screens: {
+			'xs': '375px',      // Mobile phones
+			'sm': '640px',      // Small tablets
+			'md': '768px',      // Tablets
+			'lg': '1024px',     // Small laptops
+			'xl': '1280px',     // Laptops
+			'2xl': '1400px',    // Large screens
+			'mobile-19.5': {'raw': '(max-aspect-ratio: 19.5/9)'}, // 19.5:9 mobile ratio
+		}
 		},
 		extend: {
 			colors: {
@@ -115,6 +121,10 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+			},
+			aspectRatio: {
+				'19.5/9': '19.5 / 9',
+				'mobile': '19.5 / 9'
 			}
 		}
 	},

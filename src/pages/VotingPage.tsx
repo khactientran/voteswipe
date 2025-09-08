@@ -137,38 +137,39 @@ const VotingPage = () => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated' as any }}
       />
-      <div className="container mx-auto px-4 py-8 relative">
+      <div className="container mx-auto px-3 xs:px-4 py-4 xs:py-6 md:py-8 relative">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <VoteSwipeLogo />
+        <div className="flex justify-end items-center mb-4 xs:mb-6 md:mb-8">
           <div className="text-right text-foreground">
-            <p className="text-sm opacity-90">Voting as</p>
-            <p className="font-semibold">{voterName || 'Anonymous'}</p>
+            <p className="text-xs xs:text-sm font-semibold">
+              <span className="opacity-90">Voting as </span>
+              {voterName || 'Anonymous'}
+            </p>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="text-center mb-2 text-foreground">
-          <Badge variant="secondary" className="text-base px-3 py-1.5 mb-3">
+        <div className="text-center mb-4 xs:mb-6 text-foreground">
+          <Badge variant="secondary" className="text-xs xs:text-sm md:text-base px-2 xs:px-3 py-1 xs:py-1.5 mb-2 xs:mb-3">
             Image {currentImageIndex + 1} of {totalImages}
           </Badge>
-          <div className="max-w-md mx-auto">
-            <Progress value={progressPercentage} className="h-1.5" />
-            <p className="text-foreground/80 text-xs mt-2">{completedVotes} votes cast</p>
+          <div className="max-w-xs xs:max-w-sm md:max-w-md mx-auto">
+            <Progress value={progressPercentage} className="h-1 xs:h-1.5" />
+            <p className="text-foreground/80 text-xs mt-1 xs:mt-2">{completedVotes} votes cast</p>
           </div>
         </div>
 
         {/* Main Voting Interface */}
         <div className="max-w-6xl mx-auto">
-          <Card className="p-6 md:p-8 shadow-glow bg-card/90 backdrop-blur-sm">
+          <Card className="p-3 xs:p-4 md:p-6 lg:p-8 shadow-glow bg-card/90 backdrop-blur-sm">
             {/* Image Container */}
-            <div className="relative mb-6 md:mb-8" ref={imageContainerRef}>
-              <div className="bg-muted rounded-lg overflow-hidden shadow-medium">
+            <div className="relative mb-4 xs:mb-6 md:mb-8" ref={imageContainerRef}>
+              <div className="bg-muted rounded-lg overflow-hidden shadow-medium h-[40vh] xs:h-[45vh] md:h-[55vh] lg:h-[60vh]">
                 {currentImage && (
                   <img
                     src={currentImage.url}
                     alt={currentImage.name}
-                    className="w-full h-auto object-contain max-h-[70vh]"
+                    className="w-full h-full object-contain"
                   />
                 )}
               </div>
@@ -198,57 +199,52 @@ const VotingPage = () => {
             </div>
 
             {/* Image Info */}
-            <div className="text-center mb-6">
-              <h2 className="text-xl md:text-2xl font-semibold mb-2 max-w-full truncate mx-auto">{currentImage?.name}</h2>
-              {currentVote && (
-                <Badge variant="outline" className="text-xs md:text-sm">
-                  Your vote: {currentVote === 'like' ? '❤️ Like' : currentVote === 'ok' ? '🙂 OK' : '👎 Don\'t Like'}
-                </Badge>
-              )}
+            <div className="text-center mb-4 xs:mb-6">
+              <h2 className="text-base xs:text-lg md:text-xl lg:text-2xl font-semibold mb-2 max-w-full truncate mx-auto px-2">{currentImage?.name}</h2>
             </div>
 
-            {/* Voting Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            {/* Voting Buttons - Mobile Optimized */}
+            <div className="grid grid-cols-3 gap-2 xs:gap-3 md:gap-4">
               <Button
                 onClick={() => currentImage && castVote(currentImage.id, 'like')}
-                size="lg"
+                size="sm"
                 variant={currentVote === 'like' ? 'default' : 'outline'}
-                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
+                className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
                   currentVote === 'like' 
                     ? 'bg-vote-like hover:bg-vote-like text-white' 
                     : 'hover:bg-vote-like hover:text-white hover:border-vote-like'
                 }`}
               >
-                <span className="mr-2 text-lg md:text-xl">❤️</span>
-                Like
+                <span className="text-lg xs:text-xl md:text-2xl">❤️</span>
+                <span className="hidden xs:inline">Like</span>
               </Button>
               
               <Button
                 onClick={() => currentImage && castVote(currentImage.id, 'ok')}
-                size="lg"
+                size="sm"
                 variant={currentVote === 'ok' ? 'default' : 'outline'}
-                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
+                className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
                   currentVote === 'ok' 
                     ? 'bg-vote-ok hover:bg-vote-ok text-white' 
                     : 'hover:bg-vote-ok hover:text-white hover:border-vote-ok'
                 }`}
               >
-                <span className="mr-2 text-lg md:text-xl">🙂</span>
-                OK
+                <span className="text-lg xs:text-xl md:text-2xl">🙂</span>
+                <span className="hidden xs:inline">OK</span>
               </Button>
               
               <Button
                 onClick={() => currentImage && castVote(currentImage.id, 'dislike')}
-                size="lg"
+                size="sm"
                 variant={currentVote === 'dislike' ? 'default' : 'outline'}
-                className={`h-14 md:h-16 text-base md:text-lg font-semibold ${
+                className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
                   currentVote === 'dislike' 
                     ? 'bg-vote-dislike hover:bg-vote-dislike text-white' 
                     : 'hover:bg-vote-dislike hover:text-white hover:border-vote-dislike'
                 }`}
               >
-                <span className="mr-2 text-lg md:text-xl">👎</span>
-                Don't Like
+                <span className="text-lg xs:text-xl md:text-2xl">👎</span>
+                <span className="hidden xs:inline">Don't Like</span>
               </Button>
             </div>
 

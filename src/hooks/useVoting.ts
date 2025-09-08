@@ -189,10 +189,7 @@ export const useVoting = (sessionId: string) => {
         autoAdvanceTimeoutRef.current = null;
       }, 500);
 
-      toast({
-        title: 'Vote recorded!',
-        description: `Your ${voteType} vote has been recorded.`,
-      });
+      // Vote recorded successfully - no notification needed
 
     } catch (error) {
       console.error('Error casting vote:', error);
