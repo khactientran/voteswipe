@@ -17,6 +17,7 @@ const ImageViewerOverlay = ({ src, alt = "", onClose, maxScale = 4, minScale }: 
   const [translateX, setTranslateX] = useState<number>(0);
   const [translateY, setTranslateY] = useState<number>(0);
   const [computedMinScale, setComputedMinScale] = useState<number>(1);
+  const HEADER_SAFE_PX = 56; // reserve space for top-right close button area
 
   // Gesture refs
   const lastTouchDistanceRef = useRef<number | null>(null);
@@ -27,9 +28,10 @@ const ImageViewerOverlay = ({ src, alt = "", onClose, maxScale = 4, minScale }: 
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
   const getContainerSize = useCallback(() => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    return { vw: rect?.width ?? window.innerWidth, vh: rect?.height ?? window.innerHeight };
-  }, []);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight - HEADER_SAFE_PX; // exclude header area so image avoids close button
+    return { vw, vh: Math.max(0, vh) };
+  }, [HEADER_SAFE_PX]);
 
   const getImageDisplaySize = useCallback((s: number) => {
     const w = imgRef.current?.naturalWidth || 1;
@@ -80,18 +82,14 @@ const ImageViewerOverlay = ({ src, alt = "", onClose, maxScale = 4, minScale }: 
   // Compute a fit-to-screen min scale based on natural image size and viewport
   const computeFitScale = useCallback(() => {
     const img = imgRef.current;
-    const container = containerRef.current;
-    if (!img || !container) return 1;
+    if (!img) return 1;
     const naturalW = img.naturalWidth || 1;
     const naturalH = img.naturalHeight || 1;
-    const rect = container.getBoundingClientRect();
-    const vw = rect.width;
-    const vh = rect.height;
+    const { vw, vh } = getContainerSize();
     if (!vw || !vh) return 1;
     const fit = Math.min(vw / naturalW, vh / naturalH);
-    // Do not upscale as a minimum; allow min to be at most 1
     return Math.min(1, fit);
-  }, []);
+  }, [getContainerSize]);
 
   const initializeScale = useCallback(() => {
     const fit = computeFitScale();
@@ -235,13 +233,13 @@ const ImageViewerOverlay = ({ src, alt = "", onClose, maxScale = 4, minScale }: 
       <button
         onClick={onClose}
         aria-label="Close"
-        className="absolute top-3 right-3 z-[1010] h-10 w-10 rounded-full bg-white/90 text-black flex items-center justify-center shadow-md active:scale-95"
+        className="fixed top-3 right-3 z-[1010] h-10 w-10 rounded-full bg-white/90 text-black flex items-center justify-center shadow-md active:scale-95"
       >
         ✕
       </button>
 
       {/* Centered image */}
-      <div className="absolute inset-0 flex items-center justify-center select-none">
+      <div className="absolute inset-0 flex items-center justify-center select-none" style={{ paddingTop: HEADER_SAFE_PX }}>
         <img
           ref={imgRef}
           src={src}

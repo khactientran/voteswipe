@@ -24,6 +24,25 @@ const Landing = () => {
 
 
 
+  const [secretTapCount, setSecretTapCount] = useState<number>(0);
+  const [secretWindowStartAt, setSecretWindowStartAt] = useState<number>(0);
+
+  const handleSecretTap = () => {
+    const now = Date.now();
+    if (!secretWindowStartAt || now - secretWindowStartAt > 3000) {
+      setSecretWindowStartAt(now);
+      setSecretTapCount(1);
+      return;
+    }
+    const nextCount = secretTapCount + 1;
+    setSecretTapCount(nextCount);
+    if (nextCount >= 10) {
+      setSecretTapCount(0);
+      setSecretWindowStartAt(0);
+      navigate("/admin/login");
+    }
+  };
+
   useEffect(() => {
     const existingName = localStorage.getItem("voterName");
     if (existingName) setVoterName(existingName);
@@ -92,17 +111,6 @@ const Landing = () => {
         />
         <div className="relative min-h-screen" style={{ zIndex: 3 }}>
           <div className="container mx-auto px-3 xs:px-4 py-16 xs:py-20 md:py-24 lg:py-28 min-h-screen flex flex-col">
-            {/* Admin Button - Top Left */}
-            <div className="absolute top-2 xs:top-4 left-2 xs:left-4 z-20">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/admin/login")}
-                className="text-sm px-3 py-1.5 h-8"
-              >
-                Admin
-              </Button>
-            </div>
 
             {/* Dark Mode & Audio Buttons - Top Right */}
             <div className="absolute top-2 xs:top-4 right-2 xs:right-4 z-20 flex flex-col gap-1.5">
@@ -140,7 +148,7 @@ const Landing = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={toggleMusic}
+                onClick={() => { toggleMusic(); handleSecretTap(); }}
                 disabled={isTransitioning}
                 className={`relative flex items-center gap-1.5 transition-all duration-300 overflow-hidden text-sm px-3 py-1.5 h-8 ${
                   isMusicEnabled

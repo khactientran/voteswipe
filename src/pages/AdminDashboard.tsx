@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import heroImage from "@/assets/hero-image.jpeg";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent as AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import VoteSwipeLogo from "@/components/VoteSwipeLogo";
+import ImageViewerOverlay from "@/components/ImageViewerOverlay";
 import { NewSessionDialog } from "@/components/NewSessionDialog";
 import { UploadImagesDialog } from "@/components/UploadImagesDialog";
 import { useVotingSessions } from "@/hooks/useVotingSessions";
@@ -19,7 +20,6 @@ import {
   Copy, 
   BarChart3, 
   Download,
-  Eye,
   LogOut,
   Settings,
   Loader2
@@ -30,7 +30,8 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const { sessions, images, loading, createSession, deleteSession, deleteImage, uploadImages } = useVotingSessions();
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
+  const [viewerImage, setViewerImage] = useState<{ url: string; name: string } | null>(null);
+  const lastTapRef = useRef<number>(0);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -339,8 +340,19 @@ const AdminDashboard = () => {
                             <img 
                               src={image.url} 
                               alt={image.name}
-                              className="w-12 h-12 rounded-lg object-cover cursor-pointer"
-                              onClick={() => setPreviewImage({ url: image.url, name: image.name })}
+                              className="w-12 h-12 rounded-lg object-cover cursor-zoom-in"
+                              onDoubleClick={(e) => {
+                                e.preventDefault();
+                                setViewerImage({ url: image.url, name: image.name });
+                              }}
+                              onTouchEnd={(e) => {
+                                const now = Date.now();
+                                if (now - lastTapRef.current < 300) {
+                                  e.preventDefault();
+                                  setViewerImage({ url: image.url, name: image.name });
+                                }
+                                lastTapRef.current = now;
+                              }}
                             />
                           </TableCell>
                           <TableCell className="font-medium w-[240px] max-w-[240px] truncate">{image.name}</TableCell>
@@ -367,9 +379,6 @@ const AdminDashboard = () => {
                           </TableCell>
                           <TableCell className="text-center">
                             <div className="flex justify-center gap-1">
-                              <Button variant="outline" size="sm" onClick={() => setPreviewImage({ url: image.url, name: image.name })}>
-                                <Eye className="w-4 h-4" />
-                              </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button variant="outline" size="sm" className="text-destructive">
@@ -402,20 +411,17 @@ const AdminDashboard = () => {
                   </Table>
                 </div>
               )}
-              <Dialog open={!!previewImage} onOpenChange={(open) => { if (!open) setPreviewImage(null); }}>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle className="truncate">{previewImage?.name}</DialogTitle>
-                  </DialogHeader>
-                  {previewImage && (
-                    <img src={previewImage.url} alt={previewImage.name} className="w-full h-auto rounded-md" />
-                  )}
-                </DialogContent>
-              </Dialog>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+      {viewerImage && (
+        <ImageViewerOverlay
+          src={viewerImage.url}
+          alt={viewerImage.name}
+          onClose={() => setViewerImage(null)}
+        />
+      )}
     </div>
   );
 };
