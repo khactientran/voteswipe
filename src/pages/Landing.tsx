@@ -66,7 +66,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background touch-manipulation">
       {/* Hero Section */}
-      <section className="relative min-h-screen touch-manipulation">
+      <section className="relative min-h-screen touch-manipulation overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated' as any }}

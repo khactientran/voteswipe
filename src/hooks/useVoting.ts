@@ -133,7 +133,15 @@ export const useVoting = (sessionId: string) => {
       const existingVote = votes[imageId];
       
       if (existingVote === voteType) {
-        // Same vote, do nothing
+        // Same vote reaffirmed: skip DB work but still auto-advance
+        if (autoAdvanceTimeoutRef.current) {
+          clearTimeout(autoAdvanceTimeoutRef.current);
+          autoAdvanceTimeoutRef.current = null;
+        }
+        autoAdvanceTimeoutRef.current = window.setTimeout(() => {
+          setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : prev));
+          autoAdvanceTimeoutRef.current = null;
+        }, 100);
         return;
       }
 
@@ -187,7 +195,7 @@ export const useVoting = (sessionId: string) => {
       autoAdvanceTimeoutRef.current = window.setTimeout(() => {
         setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : prev));
         autoAdvanceTimeoutRef.current = null;
-      }, 500);
+      }, 300);
 
       // Vote recorded successfully - no notification needed
 

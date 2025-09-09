@@ -7,15 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import VoteSwipeLogo from "@/components/VoteSwipeLogo";
 import { useVoting } from "@/hooks/useVoting";
+import type { VoteType } from "@/hooks/useVoting";
 import { useSwipe } from "@/hooks/useSwipe";
 import QuickNavigator from "@/components/QuickNavigator";
 import ImageScrubber from "@/components/ImageScrubber";
 import { ArrowLeft, ArrowRight, Home, Loader2 } from "lucide-react";
+import ImageViewerOverlay from "@/components/ImageViewerOverlay";
 
 const VotingPage = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const [voterName, setVoterName] = useState<string>("");
+  const [displayVote, setDisplayVote] = useState<VoteType | undefined>(undefined);
+  const [isViewerOpen, setIsViewerOpen] = useState<boolean>(false);
+  const lastTapRef = useRef<number>(0);
   
   const {
     session,
@@ -36,12 +41,17 @@ const VotingPage = () => {
 
   // Swipe support
   const imageContainerRef = useSwipe<HTMLDivElement>({
-    onSwipeLeft: () => nextImage(),
-    onSwipeRight: () => previousImage(),
+    onSwipeLeft: () => { if (!isViewerOpen) nextImage(); },
+    onSwipeRight: () => { if (!isViewerOpen) previousImage(); },
     threshold: 40,
     restraint: 100,
     allowedTime: 600,
   });
+
+  // Reset transient display vote when moving to a different image
+  useEffect(() => {
+    setDisplayVote(undefined);
+  }, [currentImageIndex]);
 
   useEffect(() => {
     const savedVoterName = localStorage.getItem("voterName") || "";
@@ -130,6 +140,7 @@ const VotingPage = () => {
 
   const progressPercentage = totalImages > 0 ? (completedVotes / totalImages) * 100 : 0;
   const currentVote = votes[currentImage?.id];
+  const effectiveVote = displayVote ?? currentVote;
 
   return (
     <div className="min-h-screen relative">
@@ -169,7 +180,21 @@ const VotingPage = () => {
                   <img
                     src={currentImage.url}
                     alt={currentImage.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain select-none"
+                    onTouchEnd={(e) => {
+                      // Double-tap detection (300ms window)
+                      const now = Date.now();
+                      if (now - lastTapRef.current < 300) {
+                        e.preventDefault();
+                        setIsViewerOpen(true);
+                      }
+                      lastTapRef.current = now;
+                    }}
+                    onDoubleClick={(e) => {
+                      // Desktop double-click
+                      e.preventDefault();
+                      setIsViewerOpen(true);
+                    }}
                   />
                 )}
               </div>
@@ -204,13 +229,20 @@ const VotingPage = () => {
             </div>
 
             {/* Voting Buttons - Mobile Optimized */}
-            <div className="grid grid-cols-3 gap-2 xs:gap-3 md:gap-4">
+            <div className="grid grid-cols-3 gap-2 xs:gap-3 md:gap-4" key={currentImage?.id}>
               <Button
-                onClick={() => currentImage && castVote(currentImage.id, 'like')}
+                onClick={() => {
+                  if (currentImage) {
+                    setDisplayVote('like');
+                    castVote(currentImage.id, 'like');
+                  }
+                }}
+                onMouseUp={(e) => (e.currentTarget as HTMLButtonElement).blur()}
+                onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
                 size="sm"
-                variant={currentVote === 'like' ? 'default' : 'outline'}
+                variant={effectiveVote === 'like' ? 'default' : 'outline'}
                 className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
-                  currentVote === 'like' 
+                  effectiveVote === 'like' 
                     ? 'bg-vote-like hover:bg-vote-like text-white' 
                     : 'hover:bg-vote-like hover:text-white hover:border-vote-like'
                 }`}
@@ -220,11 +252,18 @@ const VotingPage = () => {
               </Button>
               
               <Button
-                onClick={() => currentImage && castVote(currentImage.id, 'ok')}
+                onClick={() => {
+                  if (currentImage) {
+                    setDisplayVote('ok');
+                    castVote(currentImage.id, 'ok');
+                  }
+                }}
+                onMouseUp={(e) => (e.currentTarget as HTMLButtonElement).blur()}
+                onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
                 size="sm"
-                variant={currentVote === 'ok' ? 'default' : 'outline'}
+                variant={effectiveVote === 'ok' ? 'default' : 'outline'}
                 className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
-                  currentVote === 'ok' 
+                  effectiveVote === 'ok' 
                     ? 'bg-vote-ok hover:bg-vote-ok text-white' 
                     : 'hover:bg-vote-ok hover:text-white hover:border-vote-ok'
                 }`}
@@ -234,11 +273,18 @@ const VotingPage = () => {
               </Button>
               
               <Button
-                onClick={() => currentImage && castVote(currentImage.id, 'dislike')}
+                onClick={() => {
+                  if (currentImage) {
+                    setDisplayVote('dislike');
+                    castVote(currentImage.id, 'dislike');
+                  }
+                }}
+                onMouseUp={(e) => (e.currentTarget as HTMLButtonElement).blur()}
+                onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
                 size="sm"
-                variant={currentVote === 'dislike' ? 'default' : 'outline'}
+                variant={effectiveVote === 'dislike' ? 'default' : 'outline'}
                 className={`h-10 xs:h-12 md:h-14 text-xs xs:text-sm md:text-base font-semibold px-2 xs:px-3 md:px-4 flex items-center justify-center gap-1 xs:gap-2 ${
-                  currentVote === 'dislike' 
+                  effectiveVote === 'dislike' 
                     ? 'bg-vote-dislike hover:bg-vote-dislike text-white' 
                     : 'hover:bg-vote-dislike hover:text-white hover:border-vote-dislike'
                 }`}
@@ -280,6 +326,13 @@ const VotingPage = () => {
           )}
         </div>
       </div>
+      {isViewerOpen && currentImage && (
+        <ImageViewerOverlay
+          src={currentImage.url}
+          alt={currentImage.name}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   );
 };
